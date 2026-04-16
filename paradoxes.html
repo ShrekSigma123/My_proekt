@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вероятностные парадоксы - Математика в играх</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --coin-gold: #f4d03f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); font-family: 'Inter var', system-ui, sans-serif; color: var(--text-primary); line-height: 1.7; }
+
+        .layout { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; gap: 3rem; }
+        .nav { position: sticky; top: 2rem; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); min-width: 200px; }
+        .nav a { display: block; color: var(--text-secondary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 12px; transition: var(--transition); font-size: 0.95rem; }
+        .nav a:hover, .nav a.active { background: var(--accent); color: var(--bg-primary); }
+
+        .content { flex: 1; background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); border: 1px solid var(--border); padding: 3rem; box-shadow: var(--shadow); }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, var(--accent), #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2rem; }
+        h2 { margin: 3rem 0 1.5rem; position: relative; font-size: 1.8rem; }
+        h2::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+
+        /* Coin Styles */
+        .coin-3d { width: 140px; height: 140px; margin: 2rem auto; position: relative; cursor: pointer; transform-style: preserve-3d; perspective: 800px; }
+        .coin-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; border-radius: 50%; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .coin-front, .coin-back { position: absolute; width: 100%; height: 100%; border-radius: 50%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; }
+        .coin-front { background: radial-gradient(circle, #ffd700, #b8860b); box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.2); }
+        .coin-back { transform: rotateY(180deg); background: radial-gradient(circle, #e0e0e0, #a0a0a0); }
+        .coin-front::before { content: "🦅"; font-size: 4rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .coin-back::before { content: "💰"; font-size: 4rem; }
+
+        .coin-3d.flipping .coin-inner { animation: flipCoin 0.8s forwards; }
+        @keyframes flipCoin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(3600deg); } }
+
+        .demo-container { background: rgba(244, 208, 63, 0.1); border: 1px solid var(--coin-gold); border-radius: var(--radius); padding: 2.5rem; margin: 2rem 0; text-align: center; }
+        .demo-btn { background: linear-gradient(135deg, var(--coin-gold), #f4d03f); color: var(--bg-primary); border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: var(--transition); box-shadow: 0 10px 30px rgba(244,208,63,0.4); font-size: 1rem; margin-top: 1rem; }
+        .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(244,208,63,0.5); }
+        .result { margin-top: 1.5rem; padding: 1rem; background: var(--glass); border-radius: 12px; border-left: 4px solid var(--coin-gold); max-height: 250px; overflow-y: auto; }
+
+        @media (max-width: 900px) { .layout { flex-direction: column; } .nav { position: relative; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="nav">
+            <a href="index.html">🏠 Главная</a>
+            <a href="basics.html">📚 Основы</a>
+            <a href="dice.html">🎲 Кубики</a>
+            <a href="catan.html">🏝️ Catan</a>
+            <a href="rng.html">💻 RNG</a>
+            <a href="crit.html">⚔️ Криты</a>
+            <a href="gametheory.html">♟️ Теория игр</a>
+            <a href="paradoxes.html" class="active">🪙 Парадоксы</a>
+            <a href="simulation.html">🐍 Python</a>
+        </nav>
+
+        <main class="content">
+            <h1>🪙 Вероятностные парадоксы</h1>
+
+            <section>
+                <h2>Ошибка игрока (Gambler's Fallacy)</h2>
+                <p>это когнитивное искажение, при котором человек верит, что прошлые случайные события влияют на вероятность будущих, если события кажутся «связанными» в последовательности.</p>
+                <h2>Простой пример с монеткой:</h2>
+                <p>Допустим, монета выпала орлом 5 раз подряд. Многие начинают думать: «Теперь решка должна выпасть с большей вероятностью, потому что давно не выпадала».❌ Это не так. Вероятность решки при каждом новом броске остаётся строго 50%, независимо от того, что было до этого. У монеты нет памяти.<p>
+                <h2>Закон больших чисел — о чём он на самом деле?</h2>
+                <p>Закон больших чисел говорит: чем больше бросков, тем доля орлов стремится к 50%. Однако он не означает, что прошлые отклонения будут аннулированы.
+Представь: после 5 орлов подряд ты сделаешь ещё 1000 бросков. Итоговая доля орлов будет примерно 50% (скажем, 502 орла и 498 решек — то есть 50.2%). Абсолютное «лишнее» количество орлов (5 штук) никуда не делось, но на фоне 1005 бросков оно становится статистически незаметным. Закон работает через «затопление» прошлого отклонения новыми данными, а не через компенсацию.<p>
+                
+                
+                
+                    <div class="demo-container">
+                    <div style="font-size: 1.3rem; margin-bottom: 1.5rem; font-weight: 600;">🪙 3D-монета: честная монетка (всегда 50%)</div>
+                    <div class="coin-3d" id="coin3d">
+                        <div class="coin-inner">
+                            <div class="coin-front"></div>
+                            <div class="coin-back"></div>
+                        </div>
+                    </div>
+                    <button class="demo-btn" id="flipCoin">Подбросить монетку!</button>
+                    <div class="result" id="coinResult">
+                        <div>Серия орлов: <span id="headsStreak">0</span></div>
+                        <div>Бросков: <span id="coinTotal">0</span> | Орлов: <span id="headsCount">0</span> (<span id="headsFreq">0%</span>)</div>
+                    </div>
+                </div>
+
+                <h2>Другие ловушки</h2>
+                <ul>
+                    <li><strong>Закон серий:</strong> 10 красных в рулетке — нормально (\( (18/37)^{10} \approx 0.07\% \), но случается).</li>
+                    <li><strong>Парадокс Монти Холла:</strong> Меняя дверь — 2/3 шанса на выигрыш.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let coinTotal = 0, headsCount = 0, headsStreak = 0;
+        const coinContainer = document.getElementById('coin3d');
+
+        document.getElementById('flipCoin').addEventListener('click', () => {
+            coinContainer.classList.add('flipping');
+            setTimeout(() => {
+                const isHeads = Math.random() < 0.5;
+                const coinInner = coinContainer.querySelector('.coin-inner');
+                coinInner.style.transform = isHeads ? 'rotateY(0deg)' : 'rotateY(180deg)';
+
+                coinTotal++;
+                if (isHeads) { headsCount++; headsStreak++; } else { headsStreak = 0; }
+                const freq = ((headsCount / coinTotal) * 100).toFixed(1);
+
+                document.getElementById('headsStreak').textContent = headsStreak;
+                document.getElementById('coinTotal').textContent = coinTotal;
+                document.getElementById('headsCount').textContent = headsCount;
+                document.getElementById('headsFreq').textContent = freq + '%';
+
+                const newDiv = document.createElement('div');
+                newDiv.textContent = isHeads ? '🦅 Орёл' : '💰 Решка';
+                document.getElementById('coinResult').appendChild(newDiv);
+
+                coinContainer.classList.remove('flipping');
+            }, 800);
+        });
+    </script>
+</body>
+</html>
+

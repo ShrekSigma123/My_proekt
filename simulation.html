@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моделирование на Python - Математика в играх</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); font-family: 'Inter var', system-ui, sans-serif; color: var(--text-primary); line-height: 1.7; }
+
+        .layout { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; gap: 3rem; }
+        .nav { position: sticky; top: 2rem; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); min-width: 200px; }
+        .nav a { display: block; color: var(--text-secondary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 12px; transition: var(--transition); font-size: 0.95rem; }
+        .nav a:hover, .nav a.active { background: var(--accent); color: var(--bg-primary); }
+
+        .content { flex: 1; background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); border: 1px solid var(--border); padding: 3rem; box-shadow: var(--shadow); }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, var(--accent), #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2rem; }
+        h2 { margin: 3rem 0 1.5rem; position: relative; font-size: 1.8rem; }
+        h2::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+        pre { background: rgba(26, 26, 26, 0.9); padding: 2rem; border-radius: var(--radius); overflow-x: auto; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; margin: 1.5rem 0; }
+
+        @media (max-width: 900px) { .layout { flex-direction: column; } .nav { position: relative; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="nav">
+            <a href="index.html">🏠 Главная</a>
+            <a href="basics.html">📚 Основы</a>
+            <a href="dice.html">🎲 Кубики</a>
+            <a href="catan.html">🏝️ Catan</a>
+            <a href="rng.html">💻 RNG</a>
+            <a href="crit.html">⚔️ Криты</a>
+            <a href="gametheory.html">♟️ Теория игр</a>
+            <a href="paradoxes.html">🪙 Парадоксы</a>
+            <a href="simulation.html" class="active">🐍 Python</a>
+        </nav>
+
+        <main class="content">
+            <h1>🐍 Практическое моделирование</h1>
+
+            <section>
+                <h2>Зачем моделировать вероятности в играх?</h2>
+                <p>
+                    Теория вероятностей даёт формулы, но на практике случайные процессы могут вести себя неожиданно. Симуляция на Python позволяет:
+                </p>
+                <ul style="margin-bottom: 1.5rem; color: var(--text-secondary); padding-left: 1.5rem;">
+                    <li>Проверить теоретические расчёты (закон больших чисел).</li>
+                    <li>Оценить редкие события (например, вероятность выпадения трёх дублей подряд).</li>
+                    <li>Сравнить разные игровые стратегии (стоит ли рисковать ради крита?).</li>
+                    <li>Визуализировать распределение случайных величин.</li>
+                </ul>
+                <p>Ниже — классический пример: симуляция бросков двух кубиков и сравнение с аналитическими вероятностями.</p>
+            </section>
+
+            <section>
+                <h2>Симуляция бросков двух кубиков</h2>
+                <p>Симулируем 10 000 бросков для проверки закона больших чисел.</p>
+                <pre><code>import random
+import matplotlib.pyplot as plt
+
+num_rolls = 10000
+results = {i: 0 for i in range(2, 13)}
+
+for _ in range(num_rolls):
+    die1 = random.randint(1, 6)
+    die2 = random.randint(1, 6)
+    total = die1 + die2
+    results[total] += 1
+
+frequencies = {s: results[s] / num_rolls for s in results}
+
+theoretical = {2: 1/36, 3: 2/36, 4: 3/36, 5: 4/36, 6: 5/36, 7: 6/36,
+               8: 5/36, 9: 4/36, 10: 3/36, 11: 2/36, 12: 1/36}
+
+print("Сумма | Эксперимент | Теория")
+for s in range(2, 13):
+    print(f"{s:4d}   | {frequencies[s]:7.4f} | {theoretical[s]:.4f}")
+
+# График сравнения
+plt.bar(range(2,13), [frequencies[s] for s in range(2,13)], alpha=0.6, label='Эксперимент')
+plt.plot(range(2,13), [theoretical[s] for s in range(2,13)], 'ro-', label='Теория')
+plt.xlabel('Сумма очков'); plt.ylabel('Вероятность')
+plt.legend(); plt.show()</code></pre>
+                <p>Частота 7 ≈ 16.67%. Отклонения уменьшаются с числом бросков. Чем больше итераций, тем ближе экспериментальные частоты к теоретическим (закон больших чисел).</p>
+            </section>
+
+            <section>
+                <h2>Моделирование критических ударов</h2>
+                <p>Представим, что у персонажа 20% шанс крита и множитель урона ×2. С помощью симуляции можно оценить, как часто серия из 10 ударов даст средний урон ниже ожидаемого.</p>
+                <pre><code>import random
+
+def simulate_crits(n_attacks=10000, crit_chance=0.2, crit_mult=2, base_damage=100):
+    total_damage = 0
+    crits = 0
+    for _ in range(n_attacks):
+        if random.random() < crit_chance:
+            total_damage += base_damage * crit_mult
+            crits += 1
+        else:
+            total_damage += base_damage
+    avg_damage = total_damage / n_attacks
+    print(f"Критов: {crits}/{n_attacks} ({crits/n_attacks:.1%})")
+    print(f"Средний урон: {avg_damage:.2f} (теория: {base_damage * (1 + crit_chance*(crit_mult-1)):.2f})")
+
+simulate_crits()</code></pre>
+                <p>Результат обычно близок к 120 среднего урона. Это подтверждает формулу матожидания, которую мы разбирали на странице про криты.</p>
+            </section>
+
+            <section>
+                <h2>Оценка вероятности выпадения легендарного предмета</h2>
+                <p>В гача-играх часто стоит задача: «Сколько попыток нужно, чтобы получить предмет с шансом 1%?» Моделирование даёт распределение количества попыток.</p>
+                <pre><code>import random
+import matplotlib.pyplot as plt
+
+def until_success(p=0.01):
+    attempts = 0
+    while True:
+        attempts += 1
+        if random.random() < p:
+            return attempts
+
+# Симуляция 10 000 игроков
+results = [until_success(0.01) for _ in range(10000)]
+
+print(f"Среднее число попыток: {sum(results)/len(results):.1f} (теория: 100)")
+print(f"Медиана: {sorted(results)[len(results)//2]}")
+print(f"Максимум: {max(results)}")
+
+plt.hist(results, bins=50, density=True, alpha=0.7)
+plt.xlabel('Число попыток')
+plt.ylabel('Доля игроков')
+plt.title('Распределение попыток до выпадения легендарки (шанс 1%)')
+plt.show()</code></pre>
+                <p>Несмотря на среднее 100, многие игроки получат предмет раньше, но некоторые потратят более 300 попыток — это демонстрация «хвоста» распределения.</p>
+            </section>
+
+            <section>
+                <h2>Закон больших чисел на практике</h2>
+                <p>Чем больше испытаний, тем ближе выборочное среднее к математическому ожиданию. Следующий код показывает, как сходится средний урон при увеличении числа ударов.</p>
+                <pre><code>import random
+import matplotlib.pyplot as plt
+
+cumulative_avg = []
+total = 0
+for i in range(1, 5001):
+    damage = 100 if random.random() < 0.8 else 200
+    total += damage
+    cumulative_avg.append(total / i)
+
+plt.plot(cumulative_avg, label='Скользящее среднее')
+plt.axhline(y=120, color='r', linestyle='--', label='Теоретическое EV=120')
+plt.xlabel('Количество ударов')
+plt.ylabel('Средний урон')
+plt.legend()
+plt.show()</code></pre>
+                <p>График наглядно показывает, как случайные колебания постепенно затухают, и среднее стабилизируется около 120.</p>
+            </section>
+
+            <section>
+                <h2>Симуляция стратегий в «Камень, ножницы, бумага»</h2>
+                <p>Можно проверить, насколько эффективна случайная стратегия против предсказуемого противника.</p>
+                <pre><code>import random
+
+def play(strategy1, strategy2, rounds=1000):
+    wins1 = 0
+    moves = ['rock', 'paper', 'scissors']
+    for _ in range(rounds):
+        m1 = strategy1()
+        m2 = strategy2()
+        if (m1 == 'rock' and m2 == 'scissors') or \
+           (m1 == 'scissors' and m2 == 'paper') or \
+           (m1 == 'paper' and m2 == 'rock'):
+            wins1 += 1
+    return wins1 / rounds
+
+def random_strategy():
+    return random.choice(['rock', 'paper', 'scissors'])
+
+def always_rock():
+    return 'rock'
+
+print(f"Случайный против always_rock: {play(random_strategy, always_rock):.2%} побед")
+print(f"Случайный против случайного: {play(random_strategy, random_strategy):.2%} побед")</code></pre>
+                <p>Случайная стратегия против «всегда камень» выигрывает около 33% (только когда выпадает бумага), а против случайного — около 33% побед, 33% поражений и 33% ничьих.</p>
+            </section>
+
+            <section>
+                <h2>Заключение</h2>
+                <p>Моделирование на Python — мощный инструмент для игрового дизайна и анализа. Оно позволяет:</p>
+                <ul style="margin-bottom: 1.5rem; color: var(--text-secondary); padding-left: 1.5rem;">
+                    <li>Проверить баланс вероятностей до реализации в коде игры.</li>
+                    <li>Обнаружить редкие, но критичные сценарии (например, серию из 10 промахов подряд).</li>
+                    <li>Обучиться интуитивному пониманию случайности.</li>
+                </ul>
+                <p>Все приведённые примеры можно запустить в любой среде Python с установленными библиотеками random и matplotlib. Экспериментируйте, меняйте параметры и наблюдайте, как ведут себя вероятности!</p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

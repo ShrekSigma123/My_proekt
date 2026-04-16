@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ожидаемое значение и криты - Математика в играх</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); font-family: 'Inter var', system-ui, sans-serif; color: var(--text-primary); line-height: 1.7; }
+
+        .layout { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; gap: 3rem; }
+        .nav { position: sticky; top: 2rem; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); min-width: 200px; }
+        .nav a { display: block; color: var(--text-secondary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 12px; transition: var(--transition); font-size: 0.95rem; }
+        .nav a:hover, .nav a.active { background: var(--accent); color: var(--bg-primary); }
+
+        .content { flex: 1; background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); border: 1px solid var(--border); padding: 3rem; box-shadow: var(--shadow); }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, var(--accent), #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2rem; }
+        h2 { margin: 3rem 0 1.5rem; position: relative; font-size: 1.8rem; }
+        h2::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+
+        .demo-container { background: rgba(255, 68, 68, 0.05); border: 1px solid #ff4444; border-radius: var(--radius); padding: 2.5rem; margin: 2rem 0; text-align: center; }
+        .demo-btn { background: linear-gradient(135deg, #ff4444, #ff6666); color: var(--bg-primary); border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: var(--transition); box-shadow: 0 10px 30px rgba(255,68,68,0.4); font-size: 1rem; margin-top: 1rem; }
+        .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(255,68,68,0.5); }
+        .result { margin-top: 1.5rem; padding: 1rem; background: var(--glass); border-radius: 12px; border-left: 4px solid #ff4444; max-height: 250px; overflow-y: auto; }
+        .crit-effect { animation: critFlash 0.3s ease-out; }
+        @keyframes critFlash { 0%, 100% { text-shadow: 0 0 0 #ff4444; transform: scale(1); } 50% { text-shadow: 0 0 20px #ff4444; transform: scale(1.1); color: #ff6666; } }
+
+        @media (max-width: 900px) { .layout { flex-direction: column; } .nav { position: relative; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="nav">
+            <a href="index.html">🏠 Главная</a>
+            <a href="basics.html">📚 Основы</a>
+            <a href="dice.html">🎲 Кубики</a>
+            <a href="catan.html">🏝️ Catan</a>
+            <a href="rng.html">💻 RNG</a>
+            <a href="crit.html" class="active">⚔️ Криты</a>
+            <a href="gametheory.html">♟️ Теория игр</a>
+            <a href="paradoxes.html">🪙 Парадоксы</a>
+            <a href="simulation.html">🐍 Python</a>
+        </nav>
+
+        <main class="content">
+            <h1>📊 Ожидаемое значение и рациональный выбор в играх</h1>
+
+            <section>
+                <h2>Что такое математическое ожидание?</h2>
+                <p>
+                    Математическое ожидание (expected value, EV) — это средний результат случайного события, взвешенный по вероятностям. Формула для дискретной случайной величины:  
+                    \[
+                    \mathbb{E}[X] = \sum_{i} p_i \cdot x_i
+                    \]  
+                    где \(x_i\) — возможные исходы, \(p_i\) — их вероятности. В играх EV позволяет сравнить разные стратегии и выбрать ту, которая в среднем даёт лучший результат, даже если в каждой отдельной попытке возможен проигрыш.
+                </p>
+                <p>
+                    Пример: в пошаговой стратегии солдат атакует с вероятностью попадания 70%, нанося 10 урона. Матожидание урона = \(0.7 \times 10 = 7\). Если есть гарантированная граната с 6 урона, то EV атаки выше (7 > 6), и её стоит предпочесть, если нет других рисков (например, ответного огня).
+                </p>
+            </section>
+
+            <section>
+                <h2>Принятие решений на основе матожидания</h2>
+                <p>
+                    В XCOM, Darkest Dungeon и многих RPG каждое действие имеет вероятностный исход. Ожидаемый урон считается как:
+                    \[
+                    \text{EV} = (\text{шанс попадания}) \times (\text{урон}) + (\text{шанс крита}) \times (\text{доп. урон от крита})
+                    \]
+                    Однако EV — не единственный критерий: при игре на выживание важна дисперсия (риск). Но для долгосрочной максимизации очков или ресурсов именно ожидаемое значение — золотой стандарт.
+                </p>
+                <p>
+                    <strong>Пример из карточных игр (Gwent, Hearthstone):</strong>  
+                    У вас есть существо 2/2, а у противника — 3/3. Вы можете сыграть заклинание «Огненный шар» (50% шанс нанести 4 урона, 50% — 1 урон). EV = \(0.5 \times 4 + 0.5 \times 1 = 2.5\) урона. Этого хватит, чтобы в среднем убить врага (3 здоровья). Но в 50% случаев вы не добьёте — и тогда проиграете. Если вы рискуете проиграть партию из‑за одного неудачного броска, возможно, стоит выбрать гарантированное действие с меньшим EV.
+                </p>
+                <div style="background: rgba(0,212,170,0.1); border-left: 4px solid var(--accent); padding: 1rem 1.5rem; margin: 1.5rem 0; border-radius: 12px;">
+                    <p style="margin-bottom: 0; font-style: italic;">
+                        🧠 <strong>Правило большого числа бросков:</strong> если вы повторяете одно и то же вероятностное действие сотни раз (например, фарм мобов), то ваш суммарный результат будет близок к \(N \times \text{EV}\). Именно поэтому в MMO и рогаликах матожидание — главный ориентир для билдов.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Ожидаемый урон и критический удар</h2>
+                <p>
+                    Критический удар — частный случай модификатора урона. Пусть базовый удар наносит \(D\) урона, шанс крита \(p_{\text{crit}}\), а критический множитель равен \(k\) (обычно 2, реже 1.5 или 3). Тогда ожидаемый урон за одну атаку:
+                    \[
+                    \text{EV} = (1 - p_{\text{crit}}) \cdot D + p_{\text{crit}} \cdot (k \cdot D) = D \cdot \big(1 + p_{\text{crit}}(k - 1)\big)
+                    \]
+                    Например, при \(D=100\), \(p_{\text{crit}}=0.2\), \(k=2\): \(\text{EV} = 100 \cdot (1 + 0.2) = 120\). То есть крит повышает средний урон на 20%.
+                </p>
+                <p>
+                    Сравнение двух колец: +5% к критическому шансу (при \(k=2\)) даёт прибавку к EV = \(D \cdot 0.05\). Кольцо +5 силы (увеличивает базовый урон на 5) даёт прибавку \(5 \cdot (1 + p_{\text{crit}})\). При \(p_{\text{crit}}=0.2\) прибавка силы = 6, а прибавка крит. шанса = \(0.05 \times D\). Если \(D\) достаточно велико (например, \(D \ge 120\)), то +5% крита выгоднее. Игроки часто недооценивают линейный рост EV от крита.
+                </p>
+            </section>
+
+            <section>
+                <h2>Интерактивная демонстрация: криты и накопление EV</h2>
+                <p>
+                    Нажмите на кнопку несколько раз, чтобы смоделировать серию ударов. Справа отображается текущее среднее арифметическое урона — оно стремится к теоретическому EV = 120. Обратите внимание, что даже после 50 ударов среднее может колебаться, но с каждым новым ударом оно приближается к ожидаемому значению (закон больших чисел).
+                </p>
+                <div class="demo-container">
+                    <div style="font-size: 1.3rem; margin-bottom: 1.5rem; font-weight: 600;">💥 Критический удар (20% шанс, x2 урон)</div>
+                    <button class="demo-btn" id="critBtn">Нанести удар (100 базового урона)</button>
+                    <div class="result" id="critResult">
+                        <div>Урон: <span id="critDamage">0</span> | Критов: <span id="critCount">0</span>/<span id="critTotal">0</span></div>
+                        <div>Средний урон (экспериментальный EV): <span id="critEV">—</span></div>
+                    </div>
+                    <p style="font-size: 0.9rem; margin-top: 1rem; text-align: left;">
+                        📐 Теоретическое матожидание: \(0.8 \times 100 + 0.2 \times 200 = 120\). Чем больше ударов, тем ближе среднее значение к 120.
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Ожидаемое значение в играх с лутом и гача‑механиками</h2>
+                <p>
+                    В Genshin Impact, Brawl Stars или карточных коллекционных играх часто используют понятие «ожидаемое количество попыток до получения легендарного предмета». Если шанс выпадения редкости 1%, то в среднем потребуется 100 открытий сундуков, но реальное число может сильно варьироваться. EV позволяет рассчитать бюджет: если одно открытие стоит 100 рублей, то ожидаемая цена легендарки — 10 000 рублей. Это помогает игрокам (и разработчикам) устанавливать цены и оценивать «удачливость».
+                </p>
+                <p>
+                    Ещё один пример — рулетка в Borderlands или Destiny. Оружие со случайными параметрами: ствол, магазин, приклад. Матожидание DPS (урон в секунду) учитывает не только базовый урон, но и шансы на промах, крит, скорострельность. Формула:
+                    \[
+                    \text{EV}_{\text{DPS}} = \text{скорострельность} \times \big( \text{вероятность попадания} \times \text{EV}_{\text{урон за попадание}} \big)
+                    \]
+                </p>
+            </section>
+
+            <section>
+                <h2>Когда матожидание вводит в заблуждение?</h2>
+                <p>
+                    <strong>Парадокс Санкт-Петербурга:</strong> бесконечное EV при игре с подбрасыванием монеты, но никто не платит большие деньги за участие. Потому что полезность денег убывает, а реальный человек не может рисковать огромными суммами. В играх тоже есть риск банкротства: даже если EV положительный, один неудачный ход может уничтожить персонажа (например, в XCOM Ironman). В таких случаях используют критерий Келли или просто избегают действий с высокой дисперсией, даже если EV чуть выше альтернативы.
+                </p>
+                <p>
+                    <strong>Ошибка игрока</strong> и <strong>недооценка хвостов распределения</strong> — частые ловушки. Всегда полезно оценивать не только среднее, но и вероятность крайне плохого исхода.
+                </p>
+                <div style="background: rgba(255,68,68,0.1); border-radius: 16px; padding: 1rem 1.5rem; margin: 2rem 0;">
+                    <p style="margin-bottom: 0;">🎯 <strong>Итог:</strong> математическое ожидание — мощный инструмент для сравнения стратегий в долгой перспективе. Для одиночных ответственных решений учитывайте дисперсию и свои цели. В большинстве же RPG, слэшеров и стратегий именно EV лежит в основе баланса и выбора экипировки.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let critTotal = 0, critCount = 0, critDamageTotal = 0;
+
+        document.getElementById('critBtn').addEventListener('click', () => {
+            const isCrit = Math.random() < 0.2;
+            const damage = isCrit ? 200 : 100;
+            critTotal++;
+            if (isCrit) critCount++;
+            critDamageTotal += damage;
+            const ev = (critDamageTotal / critTotal).toFixed(1);
+
+            const damageSpan = document.getElementById('critDamage');
+            damageSpan.textContent = damage + (isCrit ? ' 💥 КРИТ!' : '');
+            document.getElementById('critCount').textContent = critCount;
+            document.getElementById('critTotal').textContent = critTotal;
+            document.getElementById('critEV').textContent = ev;
+
+            const resultDiv = document.getElementById('critResult');
+            const newDiv = document.createElement('div');
+            newDiv.textContent = `Удар №${critTotal}: ${damage} урона (среднее = ${ev})`;
+            resultDiv.appendChild(newDiv);
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+
+            if (isCrit) {
+                damageSpan.classList.add('crit-effect');
+                setTimeout(() => damageSpan.classList.remove('crit-effect'), 300);
+            }
+        });
+    </script>
+</body>
+</html>

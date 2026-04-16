@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Теория игр - Математика в играх</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg-primary); font-family: 'Inter var', system-ui, sans-serif; color: var(--text-primary); line-height: 1.7; }
+
+        .layout { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; gap: 3rem; }
+        .nav { position: sticky; top: 2rem; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); min-width: 200px; }
+        .nav a { display: block; color: var(--text-secondary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 12px; transition: var(--transition); font-size: 0.95rem; }
+        .nav a:hover, .nav a.active { background: var(--accent); color: var(--bg-primary); }
+
+        .content { flex: 1; background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); border: 1px solid var(--border); padding: 3rem; box-shadow: var(--shadow); }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, var(--accent), #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2rem; }
+        h2 { margin: 3rem 0 1.5rem; position: relative; font-size: 1.8rem; }
+        h2::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+
+        @media (max-width: 900px) { .layout { flex-direction: column; } .nav { position: relative; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="nav">
+            <a href="index.html">🏠 Главная</a>
+            <a href="basics.html">📚 Основы</a>
+            <a href="dice.html">🎲 Кубики</a>
+            <a href="catan.html">🏝️ Catan</a>
+            <a href="rng.html">💻 RNG</a>
+            <a href="crit.html">⚔️ Криты</a>
+            <a href="gametheory.html" class="active">♟️ Теория игр</a>
+            <a href="paradoxes.html">🪙 Парадоксы</a>
+            <a href="simulation.html">🐍 Python</a>
+        </nav>
+
+        <main class="content">
+            <h1>♟️ Элементы теории игр</h1>
+
+            <section>
+                <h2>Антагонистические игры с нулевой суммой</h2>
+                <p>Антагонистические игры с нулевой суммой — это класс задач теории игр, в которых выигрыш одного игрока в точности равен проигрышу другого (или нескольких других). Проще говоря: «сколько один выиграл — столько другой проиграл». Сумма выигрышей всех игроков всегда равна нулю.</p>
+                <p>Теория игр изучает оптимальные стратегии в ситуациях, где результат зависит от решений двух или более участников, интересы которых могут совпадать, конфликтовать или быть смешанными.</p>
+                <h2>Классический пример: «Камень, ножницы, бумага»</h2>
+                <p>Это симметричная антагонистическая игра с нулевой суммой:</p>
+                <p>Выигрыш: +1 (победа), 0 (ничья), –1 (поражение).</p>
+                <p>Симметрия означает, что правила одинаковы для всех игроков.</p>
+                <h2>Почему это важно на практике?</h2>
+                <h3>«Если противник предсказуем, вы выигрываете»</h3>
+                <p>Представьте, что ваш оппонент в «Камень, ножницы, бумага» почти всегда начинает с «камня». Тогда вы просто каждый раз показываете «бумагу» и побеждаете. Любая регулярность или смещение вероятностей даёт возможность для эксплуатации.</p>
+                <h2>Где это встречается в реальной жизни (помимо игры)?</h2>
+                <p>Спорт. Пенальти в футболе: вратарь выбирает сторону прыжка, бьющий — направление удара. Оптимальная стратегия — бить и прыгать влево/вправо с вероятностью 50% (иногда с учётом асимметрии правшей/левшей). Если вратарь заметит, что бьющий всегда бьёт в левый угол, он будет туда прыгать — и наоборот.</p>
+                <p>Военные игры и кибербезопасность. Атакующий выбирает цель, защитник — что защищать. Ресурсы ограничены. Случайность в распределении защиты (смешанная стратегия) не даёт противнику гарантированного успеха.</p>
+                <p>Бизнес и торги. Две компании конкурируют за контракт. Если обе будут применять предсказуемую ценовую стратегию, одна сможет всегда чуть-чуть перебивать. Оптимально иногда делать «нелогичные» предложения.</p>
+                <h2>Ключевой вывод</h2>
+                <p>Если твой противник разумен и адаптивен, лучшая стратегия — случайность (с точно рассчитанными вероятностями).</p>
+                <p>Если противник глуп или предсказуем — эксплуатируй его закономерности.</p>
+
+
+                
+            </section>
+        </main>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNG в компьютерных играх - Математика в играх</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter var', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .layout { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; gap: 3rem; }
+        .nav { position: sticky; top: 2rem; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); min-width: 200px; }
+        .nav a { display: block; color: var(--text-secondary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 12px; transition: var(--transition); font-size: 0.95rem; }
+        .nav a:hover, .nav a.active { background: var(--accent); color: var(--bg-primary); }
+
+        .content { flex: 1; background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); border: 1px solid var(--border); padding: 3rem; box-shadow: var(--shadow); }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, var(--accent), #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2rem; }
+        h2 { margin: 3rem 0 1.5rem; position: relative; font-size: 1.8rem; }
+        h2::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+        ul { margin: 1rem 0 1.5rem 2rem; }
+        li { margin-bottom: 0.5rem; }
+        strong { color: var(--text-primary); }
+        pre { background: rgba(10,10,10,0.9); padding: 1.5rem; border-radius: var(--radius); overflow-x: auto; border: 1px solid var(--border); margin: 1.5rem 0; }
+
+        @media (max-width: 900px) { .layout { flex-direction: column; } .nav { position: relative; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="nav">
+            <a href="index.html">🏠 Главная</a>
+            <a href="basics.html">📚 Основы</a>
+            <a href="dice.html">🎲 Кубики</a>
+            <a href="catan.html">🏝️ Catan</a>
+            <a href="rng.html" class="active">💻 RNG</a>
+            <a href="crit.html">⚔️ Криты</a>
+            <a href="gametheory.html">♟️ Теория игр</a>
+            <a href="paradoxes.html">🪙 Парадоксы</a>
+            <a href="simulation.html">🐍 Python</a>
+        </nav>
+
+        <main class="content">
+            <h1>💻 Математика в компьютерных играх: RNG</h1>
+
+            <section>
+                <h2>Генераторы случайных чисел (RNG) в компьютерных играх</h2>
+                <p>В компьютерных играх случайность (попадание критом, выпадение лута, поведение противников) обычно реализуется не с помощью истинно случайных физических процессов, а через генераторы псевдослучайных чисел (RNG — Random Number Generator). Это детерминированные алгоритмы, которые выдают последовательность чисел, внешне неотличимую от случайной, но при этом полностью определяемую начальным значением — seed (зерном)</p>
+                <pre><code>X_{n+1} = (a * X_n + c) mod m</code></pre>
+                <p>Где игры берут seed? Чаще всего используют системное время (например, количество миллисекунд с момента запуска программы). Это гарантирует, что при каждом запуске игры последовательность будет разной.</p>
+                <h3>Также seed может смешиваться с:</h3>
+                <p><strong>ID процесса</strong></p>
+                <p><strong>координатами мыши координатами мыши</strong></p>
+                <p><strong>нажатиями клавиш (чтобы добавить энтропии)</strong></p>
+                <p>Важно: это <strong>псевдослучайность</strong>, не истинная. В ранних Civilization одинаковый seed позволял переигрывать бои.</p>
+
+                <h2>Примеры RNG в играх</h2>
+                <ul>
+                    <li><strong>Критический урон</strong> в RPG (WoW, Diablo): шанс крита 20%. Генерируется число от 0 до 1, если < 0.2 — урон x2.</li>
+                    <li><strong>Лутбоксы/дроп</strong>: предмет 1% шанс. В среднем 100 убийств монстров. Некоторые игры используют PRD (pseudo-random distribution) для сглаживания серий неудач.</li>
+                    <li><strong>Minecraft</strong>: мир от сида. Speedrun'еры используют известные сиды для алмазов.</li>
+                </ul>
+                <h2>Как разработчики борются с предсказуемостью?</h2>
+                <p><strong>Меняют seed чаще</strong> - например, каждый ход, каждое действие игрока, каждый кадр.</p>
+                <p><strong>Перемешивают несколько источников энтропии</strong>— время, счётчик кадров, координаты клика.</p>
+                <p><strong>Применяют «сглаживание случайности» </strong>(например, в некоторых играх критический урон гарантированно выпадает после определённого числа промахов — это уже не чистая случайность, а гейм-дизайнерский приём).</p>
+                <h2>Почему в играх не используют истинную случайность?</h2>
+                <p>Истинная случайность (например, считывание радиоактивного распада или теплового шума) требует специального оборудования или медленных системных вызовов. Для игры это слишком дорого и непредсказуемо.Более того, игроки не любят истинную случайность — серии из трёх промахов подряд с вероятностью 1% будут реально случаться, но люди воспринимают это как «сломанный генератор». Поэтому во многих играх применяют «честный» псевдослучайный генератор с подкрутками (например, в XCOM скрыто повышают шанс на попадание после промаха).</p>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
+

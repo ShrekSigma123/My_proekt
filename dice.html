@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игры с кубиками - Математика в играх</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter var', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .layout { max-width: 1400px; margin: 0 auto; padding: 2rem; display: flex; gap: 3rem; }
+        .nav { position: sticky; top: 2rem; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); min-width: 200px; }
+        .nav a { display: block; color: var(--text-secondary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 12px; transition: var(--transition); font-size: 0.95rem; }
+        .nav a:hover, .nav a.active { background: var(--accent); color: var(--bg-primary); }
+
+        .content { flex: 1; background: var(--glass); backdrop-filter: blur(20px); border-radius: var(--radius); border: 1px solid var(--border); padding: 3rem; box-shadow: var(--shadow); }
+        h1 { font-size: 3rem; background: linear-gradient(135deg, var(--accent), #00ff88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 2rem; }
+        h2 { margin: 3rem 0 1.5rem; position: relative; font-size: 1.8rem; }
+        h2::after { content: ''; position: absolute; bottom: -8px; left: 0; width: 50px; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+        p { margin-bottom: 1.5rem; color: var(--text-secondary); }
+        ul { margin: 1rem 0 1.5rem 2rem; }
+        li { margin-bottom: 0.5rem; }
+
+        /* Dice 3D Styles */
+        .demo-container { 
+            background: rgba(0, 212, 170, 0.05); 
+            border: 1px solid var(--accent); 
+            border-radius: var(--radius); 
+            padding: 2.5rem; 
+            margin: 2rem 0; 
+            text-align: center; 
+        }
+        .dice-3d-container {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin: 2rem 0;
+            perspective: 800px;
+        }
+        .die-3d {
+            width: 90px; height: 90px; position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .die-3d.rolling { animation: rollDice3D 0.8s cubic-bezier(0.4, 2.0, 0.6, 1.2); }
+        @keyframes rollDice3D {
+            0% { transform: rotateX(0deg) rotateY(0deg) translateY(0); }
+            100% { transform: rotateX(2880deg) rotateY(1440deg) translateY(0); }
+        }
+        .face {
+            position: absolute; width: 90px; height: 90px;
+            background: #ecf0f1; border-radius: 12px;
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .face-front  { transform: translateZ(45px); background: #f8f9fa; }
+        .face-back   { transform: rotateY(180deg) translateZ(45px); background: #e9ecef; }
+        .face-right  { transform: rotateY(90deg) translateZ(45px); background: #dee2e6; }
+        .face-left   { transform: rotateY(-90deg) translateZ(45px); background: #ced4da; }
+        .face-top    { transform: rotateX(90deg) translateZ(45px); background: #f1f3f5; }
+        .face-bottom { transform: rotateX(-90deg) translateZ(45px); background: #adb5bd; }
+        .dot {
+            position: absolute; width: 14px; height: 14px;
+            background: #2c3e50; border-radius: 50%;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .demo-btn { 
+            background: linear-gradient(135deg, var(--accent), #00ff88); 
+            color: var(--bg-primary); border: none; padding: 1rem 2rem; 
+            border-radius: 50px; font-weight: 600; cursor: pointer; 
+            transition: var(--transition); box-shadow: 0 10px 30px rgba(0,212,170,0.4); 
+            font-size: 1rem; margin-top: 1rem;
+        }
+        .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(0,212,170,0.5); }
+        .result { 
+            margin-top: 1.5rem; padding: 1rem; 
+            background: var(--glass); border-radius: 12px; 
+            border-left: 4px solid var(--accent); 
+            max-height: 200px; overflow-y: auto;
+        }
+
+        @media (max-width: 900px) { .layout { flex-direction: column; } .nav { position: relative; } .dice-3d-container { flex-direction: column; align-items: center; gap: 1rem; } }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="nav">
+            <a href="index.html">🏠 Главная</a>
+            <a href="basics.html">📚 Основы</a>
+            <a href="dice.html" class="active">🎲 Кубики</a>
+            <a href="catan.html">🏝️ Catan</a>
+            <a href="rng.html">💻 RNG</a>
+            <a href="crit.html">⚔️ Криты</a>
+            <a href="gametheory.html">♟️ Теория игр</a>
+            <a href="paradoxes.html">🪙 Парадоксы</a>
+            <a href="simulation.html">🐍 Python</a>
+        </nav>
+
+        <main class="content">
+            <h1>🎲 Игры с кубиками</h1>
+
+            <section>
+                <h2>Анализ вероятностей в играх с кубиками («Монополия», «Кости»)</h2>
+                <p>Кубики — один из древнейших генераторов случайности, известный человечеству тысячи лет. В большинстве настольных игр используются два стандартных шестигранных кубика (обозначаются как 2d6). Сумма очков на двух кубиках может меняться от 2 до 12. Но ключевое свойство: эта сумма распределена неравномерно. В отличие от одного кубика (1d6), где каждое число от 1 до 6 выпадает с одинаковой вероятностью 1/6, при суммировании двух кубиков разные значения имеют разную вероятность.</p>
+                <h2>Почему распределение неравномерное?</h2>
+                <p>Причина — в количестве способов (комбинаций) получить ту или иную сумму. Всего возможных исходов при броске двух кубиков: 6 × 6 = 36 (каждый кубик независим). Каждая комбинация (например, (1,1) или (3,5)) равновероятна. Но разным суммам соответствует разное число комбинаций.</p>
+                <ul>
+                    <li>Сумма 2: (1,1) → 1 способ. Вероятность \( \frac{1}{36} \approx 2,78\% \).</li>
+                    <li>Сумма 3: (1,2), (2,1) → 2 способа. \( \frac{2}{36} \approx 5,56\% \).</li>
+                    <li>Сумма 7: 6 способов → \( \frac{6}{36} = 16,67\% \) (максимум).</li>
+                    <li>Сумма 12: 1 способ → \( 2,78\% \).</li>
+                </ul>
+                <h2>Применение в игре «Монополия»</h2>
+                <p>В «Монополии» игроки бросают два кубика и передвигаются на выпавшее количество клеток. Из-за неравномерного распределения некоторые клетки посещаются значительно чаще других. Это влияет на стратегию покупки недвижимости:</p>
+                <p>Клетки, которые находятся на расстоянии 7 клеток от часто посещаемых мест (например, от «Тюрьмы» или «Старта»), получают больше трафика.</p>
+                <p>Клетки, соответствующие суммам 6 и 8, также популярны.</p>
+                <p>Клетки, до которых можно добраться только выпадением 2, 3, 11, 12, посещаются редко, и покупать их менее выгодно.</p>
+                <p>Опытные игроки в «Монополию» знают: «Оранжевые» и «Красные» улицы (в классической версии) находятся на оптимальном расстоянии от наиболее вероятных сумм выпадения, поэтому их окупаемость выше.</p>
+
+                <div class="demo-container">
+                    <div style="font-size: 1.3rem; margin-bottom: 1.5rem; font-weight: 600;">🎲 3D-кубики: бросок двух костей</div>
+                    <div class="dice-3d-container">
+                        <div class="die-3d" id="die3d1">
+                            <div class="face face-front" data-value="1"><div class="dot"></div></div>
+                            <div class="face face-back" data-value="6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-right" data-value="4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-left" data-value="3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-top" data-value="2"><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-bottom" data-value="5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                        </div>
+                        <div class="die-3d" id="die3d2">
+                            <div class="face face-front" data-value="1"><div class="dot"></div></div>
+                            <div class="face face-back" data-value="6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-right" data-value="4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-left" data-value="3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-top" data-value="2"><div class="dot"></div><div class="dot"></div></div>
+                            <div class="face face-bottom" data-value="5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                        </div>
+                    </div>
+                    <button class="demo-btn" id="rollDice3D">Бросить кубики!</button>
+                    <div class="result" id="diceResult3D">
+                        <div>Сумма: <span id="diceSum3D">0</span> | Бросков: <span id="diceTotal3D">0</span></div>
+                        <div>Частота 7: <span id="dice7Freq3D">0%</span></div>
+                    </div>
+                </div>
+                <h2>Распространённое заблуждение</h2>
+                <p>Некоторые игроки думают: «Раз сумма 7 выпадает чаще всего, то если долго не было семёрки, она скоро выпадет» — это ошибка. Каждый бросок независим, вероятности не меняются. Однако для принятия стратегических решений важно знать априорное распределение, а не гадать о «компенсации».</p>
+            </section>
+
+            <!-- НОВЫЕ РАСШИРЕННЫЕ РАЗДЕЛЫ ПРО ОЖИДАЕМОЕ ЗНАЧЕНИЕ -->
+            <section>
+                <h2>Математическое ожидание суммы двух кубиков</h2>
+                <p>
+                    Ожидаемое значение (средний результат) броска двух честных шестигранных кубиков легко вычислить. Для одного кубика матожидание равно:
+                    \[
+                    \mathbb{E}[d6] = \frac{1+2+3+4+5+6}{6} = 3.5
+                    \]
+                    Поскольку кубики независимы, матожидание их суммы равно сумме матожиданий:
+                    \[
+                    \mathbb{E}[d6 + d6] = 3.5 + 3.5 = 7
+                    \]
+                    Именно поэтому сумма 7 является самой вероятной — она совпадает со средним значением. Это свойство используется во многих играх для балансировки.
+                </p>
+                <p>
+                    Более формально, для дискретного распределения:
+                    \[
+                    \mathbb{E}[X] = \sum_{s=2}^{12} s \cdot P(X=s) = 2\cdot\frac{1}{36} + 3\cdot\frac{2}{36} + \dots + 12\cdot\frac{1}{36} = 7
+                    \]
+                    Знание матожидания помогает игрокам оценивать средний выигрыш или продвижение по полю за большое число ходов.
+                </p>
+
+                <h2>Сравнение с одним кубиком: когда выгоднее 2d6?</h2>
+                <p>
+                    В некоторых играх нужно преодолеть определённый порог (например, в «Подземельях и драконах» проверка характеристики). Бросок 1d20 даёт равномерное распределение, а 2d6 — колоколообразное с центром в 7. Вероятность выбросить 10 или больше на 2d6:
+                    \[
+                    P(\ge 10) = P(10)+P(11)+P(12) = \frac{3}{36}+\frac{2}{36}+\frac{1}{36} = \frac{6}{36} \approx 16.7\%
+                    \]
+                    На 1d20 вероятность получить 10+ равна 55% (11 значений из 20). 2d6 даёт гораздо более предсказуемые результаты, что важно в тактических играх, где игроки не любят крайностей.
+                </p>
+
+                <h2>Ожидаемое значение в «Колонизаторах» (Catan)</h2>
+                <p>
+                    В Catan каждое поле с номером (от 2 до 12) приносит ресурс, когда на кубиках выпадает эта сумма. Матожидание количества ресурсов с одного поля за один бросок равно вероятности выпадения его номера. Поле с номером 6 даёт \( \frac{5}{36} \approx 0.139 \) ресурса в среднем, а поле с номером 2 — всего \( \frac{1}{36} \approx 0.028 \). Игроки, понимая это, борются за контроль над «хорошими» номерами (6 и 8), а также учитывают, что два поля с суммой 6 и 8 вместе дают \( \frac{10}{36} \approx 0.278 \) ресурса за бросок — почти в 10 раз больше, чем одно поле с номером 2.
+                </p>
+                <p>
+                    Формула среднего дохода за раунд:
+                    \[
+                    \mathbb{E}[\text{ресурсы}] = \sum_{\text{поля } i} P(\text{номер}_i) \times (\text{количество ресурсов с поля})
+                    \]
+                    Оптимальная стратегия — максимизировать это ожидание, не забывая о разнообразии ресурсов.
+                </p>
+
+                <h2>Дисперсия и риск: почему не всегда стоит гнаться за высоким EV?</h2>
+                <p>
+                    В игре «Кости» (Craps) ставка на «пас» имеет EV около -1.4% (преимущество казино). Однако некоторые ставки имеют более высокое EV, но и гораздо большую дисперсию. Например, ставка на конкретную сумму (hardway) даёт высокий выигрыш, но очень низкую вероятность. Для игрока с ограниченным банкроллом высокая дисперсия может привести к быстрому проигрышу, даже если EV не сильно отрицателен.
+                </p>
+                <p>
+                    Мера разброса — дисперсия суммы двух кубиков. Для одного кубика: \(\text{Var}(d6) = \frac{35}{12} \approx 2.917\). Для суммы двух независимых кубиков: \(\text{Var}(d6+d6) = 2 \times \frac{35}{12} = \frac{35}{6} \approx 5.833\). Среднеквадратическое отклонение \(\sigma \approx 2.415\). Это означает, что примерно в 68% случаев сумма будет лежать в интервале \([7-2.415, 7+2.415] \approx [4.6, 9.4]\), то есть между 5 и 9 включительно. Такая информация помогает игрокам оценивать риски.
+                </p>
+
+                <h2>Закон больших чисел и кубики</h2>
+                <p>
+                    Если сделать много бросков (например, 10 000), среднее арифметическое выпавших сумм будет стремиться к 7. Это иллюстрирует интерактивная демонстрация выше — чем больше бросков, тем ближе частота семёрки к 1/6, а среднее значение — к 7. В долгосрочной перспективе казино и разработчики игр опираются именно на эти математические ожидания.
+                </p>
+                <p>
+                    <strong>Практический вывод:</strong> в настольных играх, где случайность определяет ход партии, понимание матожидания и дисперсии позволяет принимать более взвешенные решения: стоит ли рисковать ради большого, но редкого выигрыша, или лучше выбрать стабильную, но менее прибыльную стратегию.
+                </p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let diceTotal3D = 0, dice7Count3D = 0;
+
+        function updateDieFace(dieElement, value) {
+            const faces = dieElement.querySelectorAll('.face');
+            faces.forEach(face => {
+                face.innerHTML = '';
+                face.setAttribute('data-value', value);
+                for(let i = 0; i < value; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    face.appendChild(dot);
+                }
+            });
+            // Position dots via CSS data-value selectors (simplified)
+        }
+
+        function rollDice3D() {
+            const die1El = document.getElementById('die3d1');
+            const die2El = document.getElementById('die3d2');
+            die1El.classList.add('rolling');
+            die2El.classList.add('rolling');
+
+            setTimeout(() => {
+                const roll1 = Math.floor(Math.random() * 6) + 1;
+                const roll2 = Math.floor(Math.random() * 6) + 1;
+                const sum = roll1 + roll2;
+
+                updateDieFace(die1El, roll1);
+                updateDieFace(die2El, roll2);
+
+                diceTotal3D++;
+                if (sum === 7) dice7Count3D++;
+                const freq = ((dice7Count3D / diceTotal3D) * 100).toFixed(1);
+
+                document.getElementById('diceSum3D').textContent = sum;
+                document.getElementById('diceTotal3D').textContent = diceTotal3D;
+                document.getElementById('dice7Freq3D').textContent = freq + '%';
+
+                const resultDiv = document.getElementById('diceResult3D');
+                const newDiv = document.createElement('div');
+                newDiv.textContent = `Бросок ${roll1}+${roll2}=${sum}`;
+                resultDiv.appendChild(newDiv);
+
+                die1El.classList.remove('rolling');
+                die2El.classList.remove('rolling');
+            }, 800);
+        }
+
+        document.getElementById('rollDice3D').addEventListener('click', rollDice3D);
+        updateDieFace(document.getElementById('die3d1'), 1);
+        updateDieFace(document.getElementById('die3d2'), 1);
+    </script>
+</body>
+</html>

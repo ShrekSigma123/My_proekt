@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математика в играх: анализ вероятностей и стратегий</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #00d4aa;
+            --accent-glow: #00ff88;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 136, 0.1) 0%, transparent 50%);
+            font-family: 'Inter var', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .theme-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: var(--transition);
+            box-shadow: var(--shadow-glass);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-glow));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .theme-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .theme-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .theme-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .theme-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .themes-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            body { padding: 1rem 0.5rem; }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="hero">
+            <h1>🧮 Математика в играх</h1>
+            <p>Анализ вероятностей, стратегий и оптимальных решений в настольных и компьютерных играх. Интерактивные демо, формулы и практические примеры.</p>
+        </section>
+
+        <section>
+            <div class="themes-grid">
+                <a href="basics.html" class="theme-card">
+                    <span class="theme-icon">📚</span>
+                    <div class="theme-title">Основы вероятностей</div>
+                    <div class="theme-desc">События, частота, вероятность, математическое ожидание на игровых примерах</div>
+                </a>
+
+                <a href="dice.html" class="theme-card">
+                    <span class="theme-icon">🎲</span>
+                    <div class="theme-title">Игры с кубиками</div>
+                    <div class="theme-desc">Монополия, Крэпс, 3D симулятор бросков двух кубиков</div>
+                </a>
+
+                <a href="catan.html" class="theme-card">
+                    <span class="theme-icon">🏝️</span>
+                    <div class="theme-title">Колонизаторы Catan</div>
+                    <div class="theme-desc">Оптимальное размещение поселений, анализ вероятностей номеров</div>
+                </a>
+
+                <a href="rng.html" class="theme-card">
+                    <span class="theme-icon">💻</span>
+                    <div class="theme-title">RNG в комп. играх</div>
+                    <div class="theme-desc">Генераторы случайных чисел, лутбоксы, криты в RPG</div>
+                </a>
+
+                <a href="crit.html" class="theme-card">
+                    <span class="theme-icon">⚔️</span>
+                    <div class="theme-title">Ожидаемое значение</div>
+                    <div class="theme-desc">Критические удары, сравнение экипировки, риски</div>
+                </a>
+
+                <a href="gametheory.html" class="theme-card">
+                    <span class="theme-icon">♟️</span>
+                    <div class="theme-title">Теория игр</div>
+                    <div class="theme-desc">Камень-ножницы-бумага, Морской бой, равновесие Нэша</div>
+                </a>
+
+                <a href="paradoxes.html" class="theme-card">
+                    <span class="theme-icon">🪙</span>
+                    <div class="theme-title">Парадоксы</div>
+                    <div class="theme-desc">Ошибка игрока, закон серий, Монти Холл + симулятор монеты</div>
+                </a>
+
+                <a href="simulation.html" class="theme-card">
+                    <span class="theme-icon">🐍</span>
+                    <div class="theme-title">Моделирование</div>
+                    <div class="theme-desc">Python симуляция кубиков, сравнение теории и эксперимента</div>
+                </a>
+            </div>
+        </section>
+
+        <div class="footer">
+            Проект «Анализ вероятностей и статистика • Интерактивный сайт
+        </div>
+    </div>
+</body>
+</html>
+
